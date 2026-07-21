@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -229,6 +230,6 @@ private fun PlainField(value: String, onValueChange: (String) -> Unit, placehold
 
 /** One-sided border helper (bottom only) for this screen's rules. */
 private fun Modifier.bottomBorderLine(width: androidx.compose.ui.unit.Dp, color: androidx.compose.ui.graphics.Color): Modifier =
-    this.then(androidx.compose.ui.draw.drawBehind {
+    this.then(Modifier.drawBehind {
         drawLine(color, androidx.compose.ui.geometry.Offset(0f, size.height), androidx.compose.ui.geometry.Offset(size.width, size.height), width.toPx())
     })
