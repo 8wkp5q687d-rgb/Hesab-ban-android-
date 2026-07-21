@@ -5,8 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -39,12 +38,16 @@ private val HesabBanColorScheme = lightColorScheme(
 )
 
 // Zero corner radius everywhere — "Modernist" language, no rounding ever.
+// Material3's Shapes requires CornerBasedShape specifically (RectangleShape
+// doesn't qualify, even though it's visually identical) — RoundedCornerShape(0.dp)
+// is the correct zero-radius CornerBasedShape.
+private val Zero = RoundedCornerShape(0.dp)
 private val ZeroShapes = androidx.compose.material3.Shapes(
-    extraSmall = RectangleShape,
-    small = RectangleShape,
-    medium = RectangleShape,
-    large = RectangleShape,
-    extraLarge = RectangleShape
+    extraSmall = Zero,
+    small = Zero,
+    medium = Zero,
+    large = Zero,
+    extraLarge = Zero
 )
 
 private val HesabBanTypography = Typography(
