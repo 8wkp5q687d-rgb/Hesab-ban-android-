@@ -10,7 +10,8 @@ data class Transaction(
     val amount: Long,          // normalized to Toman
     val type: String,          // "INCOME" or "EXPENSE"
     val category: String,      // خوراک، حمل‌ونقل، قبض‌ها، خرید، درآمد، سایر
-    val description: String,
+    val title: String,         // short row title, e.g. "تاکسی" or "خرید کارتی — بانک ملت"
+    val description: String,   // meta/detail text (unused directly by UI now, kept for compat)
     val rawSms: String? = null,
     val sender: String? = null,     // originating SMS number, if any
     val bankName: String? = null,   // resolved from sender allow-list, if matched

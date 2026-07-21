@@ -6,8 +6,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bezz.hesabban.ui.AppRoot
+import com.bezz.hesabban.ui.theme.HesabBanTheme
 import com.bezz.hesabban.viewmodel.TransactionViewModel
 
 class MainActivity : ComponentActivity() {
@@ -27,28 +26,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
-                Surface {
-                    val viewModel: TransactionViewModel = viewModel()
-                    var permissionsRequested by remember { mutableStateOf(false) }
+            HesabBanTheme {
+                val viewModel: TransactionViewModel = viewModel()
+                var permissionsRequested by remember { mutableStateOf(false) }
 
-                    if (!permissionsRequested && !hasSmsPermissions()) {
+                if (!permissionsRequested && !hasSmsPermissions()) {
+                    permissionLauncher.launch(
+                        arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)
+                    )
+                    permissionsRequested = true
+                }
+
+                AppRoot(viewModel = viewModel, onRequestSmsImport = {
+                    if (hasSmsPermissions()) {
+                        viewModel.importSmsHistory()
+                    } else {
                         permissionLauncher.launch(
                             arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)
                         )
-                        permissionsRequested = true
                     }
-
-                    AppRoot(viewModel = viewModel, onRequestSmsImport = {
-                        if (hasSmsPermissions()) {
-                            viewModel.importSmsHistory()
-                        } else {
-                            permissionLauncher.launch(
-                                arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)
-                            )
-                        }
-                    })
-                }
+                })
             }
         }
     }

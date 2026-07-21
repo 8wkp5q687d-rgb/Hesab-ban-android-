@@ -51,11 +51,18 @@ object Ingest {
             }
         }
 
+        // SMS rarely names the merchant. Per SMS_PARSING.md sec.7 fallback:
+        // when title is unknown, use "خرید کارتی — {بانک}" (user can rename later).
+        val title = if (category != "سایر" && category != "درآمد") category else {
+            if (parsed.type == "INCOME") "واریز — $resolvedBankName" else "خرید کارتی — $resolvedBankName"
+        }
+
         db.transactionDao().insert(
             Transaction(
                 amount = parsed.amount,
                 type = parsed.type,
                 category = category,
+                title = title,
                 description = parsed.rawBody.take(140),
                 rawSms = parsed.rawBody,
                 sender = sender,

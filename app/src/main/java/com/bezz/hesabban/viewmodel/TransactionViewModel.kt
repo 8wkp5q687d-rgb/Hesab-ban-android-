@@ -40,6 +40,9 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     private val _monthlySummary = MutableStateFlow<List<CategorySummary>>(emptyList())
     val monthlySummary: StateFlow<List<CategorySummary>> = _monthlySummary
 
+    private val _previousMonthSummary = MutableStateFlow<List<CategorySummary>>(emptyList())
+    val previousMonthSummary: StateFlow<List<CategorySummary>> = _previousMonthSummary
+
     private val _importStatus = MutableStateFlow<String?>(null)
     val importStatus: StateFlow<String?> = _importStatus
 
@@ -52,23 +55,28 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
             val now = System.currentTimeMillis()
             _weeklySummary.value = repo.summary(now - 7L * 24 * 60 * 60 * 1000, now)
 
-            val cal = Calendar.getInstance()
-            cal.set(Calendar.DAY_OF_MONTH, 1)
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            _monthlySummary.value = repo.summary(cal.timeInMillis, now)
+            val startOfMonth = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+            }
+            _monthlySummary.value = repo.summary(startOfMonth.timeInMillis, now)
+
+            val startOfPrevMonth = (startOfMonth.clone() as Calendar).apply { add(Calendar.MONTH, -1) }
+            _previousMonthSummary.value = repo.summary(startOfPrevMonth.timeInMillis, startOfMonth.timeInMillis)
         }
     }
 
-    fun addManual(amount: Long, type: String, category: String, description: String) {
+    fun addManual(amount: Long, type: String, category: String, title: String) {
         viewModelScope.launch {
             repo.add(
                 Transaction(
                     amount = amount,
                     type = type,
                     category = category,
-                    description = description,
+                    title = title,
+                    description = title,
                     date = System.currentTimeMillis(),
                     source = "MANUAL"
                 )
@@ -121,6 +129,20 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     fun deleteSender(sender: Sender) {
         viewModelScope.launch {
             db.senderDao().delete(sender)
+        }
+    }
+
+    // --- Manual account/card management ---
+
+    fun addAccount(bankName: String, last4: String, balance: Long) {
+        viewModelScope.launch {
+            db.accountDao().insert(Account(bankName = bankName, last4 = last4, balance = balance))
+        }
+    }
+
+    fun deleteAccount(account: Account) {
+        viewModelScope.launch {
+            db.accountDao().delete(account)
         }
     }
 }
